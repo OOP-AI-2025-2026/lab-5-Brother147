@@ -6,85 +6,107 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
+/**
+ * Главное окно игры "Камень-ножницы-бумага".
+ */
 public class MainFrame extends JFrame implements ActionListener {
+
+    private final JLabel playerLabel;
+    private final JLabel computerLabel;
+
+    private final Random random = new Random();
 
     public MainFrame(String title) throws HeadlessException {
         super(title);
 
-        this.setResizable(false);
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setResizable(false);
+        setSize(400, 250);
+        setLocationRelativeTo(null);
 
-        ((JComponent) getContentPane()).setBorder(
-                BorderFactory.createMatteBorder(10, 10, 10, 10, Color.WHITE));
+        getContentPane().setLayout(new BorderLayout());
 
-        JButton rockButton = new JButton("Камінь");
+        // Центральная панель с подписями
+        JPanel centerPanel = new JPanel(new GridLayout(2, 1));
+        playerLabel = new JLabel("Player: -", SwingConstants.CENTER);
+        computerLabel = new JLabel("Computer: -", SwingConstants.CENTER);
+        playerLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        computerLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        centerPanel.add(playerLabel);
+        centerPanel.add(computerLabel);
+
+        getContentPane().add(centerPanel, BorderLayout.CENTER);
+
+        // Нижняя панель с кнопками выбора хода игрока
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        JButton rockButton = new JButton("Rock");
+        rockButton.setActionCommand("ROCK");
         rockButton.addActionListener(this);
-        rockButton.setActionCommand("rock");
-        JButton paperButton = new JButton("Папір");
+        buttonsPanel.add(rockButton);
+
+        JButton paperButton = new JButton("Paper");
+        paperButton.setActionCommand("PAPER");
         paperButton.addActionListener(this);
-        paperButton.setActionCommand("paper");
-        JButton scissorsButton = new JButton("Ножиці");
+        buttonsPanel.add(paperButton);
+
+        JButton scissorsButton = new JButton("Scissors");
+        scissorsButton.setActionCommand("SCISSORS");
         scissorsButton.addActionListener(this);
-        scissorsButton.setActionCommand("scissors");
+        buttonsPanel.add(scissorsButton);
 
-        this.add(rockButton);
-        this.add(paperButton);
-        this.add(scissorsButton);
-
-        this.pack();
-        this.setVisible(true);
+        getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
     }
 
+    /**
+     * Генерация случайной фигуры для компьютера.
+     */
     private GameShape generateShape() {
-
-        // TODO: написати логіку методу
-
-        // Метод повертає об'єкт ігрової фігури (камінь, ножиці чи папір)
-        // випадковим чином
-
-        int random = new Random().nextInt(3);
-
-        return new GameShape(); // TODO: змініть на об'єкт потрібної фігури
+        int value = random.nextInt(3);
+        return switch (value) {
+            case 0 -> new Rock();
+            case 1 -> new Paper();
+            default -> new Scissors();
+        };
     }
 
+    /**
+     * Проверка победителя.
+     *
+     * @return 1  — выиграл игрок
+     *        -1  — выиграл компьютер
+     *         0  — ничья
+     */
     private int checkWinner(GameShape player, GameShape computer) {
-
-        // Метод отримує клас фігури гравця і комп'ютера за допомогою оператора instanceof
-        // Метод повертає 1 якщо переміг гравець
-        // Метод повертає 0 якщо нічия (обидві фігури однакові)
-        // Метод повертає -1 якщо переміг комп'ютер
-
-        // TODO: написати логіку методу
-
-        return 0;
+        return player.compare(computer);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // Генерується ход комп'ютеру
-        GameShape computerShape = generateShape();
+        GameShape playerShape;
+        String command = e.getActionCommand();
 
-        GameShape playerShape = new GameShape();
-        // Визначаємо, на яку кнопку натиснув гравець
-        switch (e.getActionCommand()) {
-            case "rock":
-                // присвоїти playerShape об'єкт відповідного класу
-                break;
-            case "paper":
-                // присвоїти playerShape об'єкт відповідного класу
-                break;
-            case "scissors":
-                // присвоїти playerShape об'єкт відповідного класу
-                break;
+        switch (command) {
+            case "ROCK" -> playerShape = new Rock();
+            case "PAPER" -> playerShape = new Paper();
+            case "SCISSORS" -> playerShape = new Scissors();
+            default -> {
+                return;
+            }
         }
 
-        // Визначити результат гри
-        int gameResult = checkWinner(playerShape, computerShape);
+        GameShape computerShape = generateShape();
 
-        // Сформувати повідомлення
-        String message = "Player shape: " + playerShape + ". Computer shape: " + computerShape + ". ";
-        switch (gameResult) {
+        playerLabel.setText("Player: " + playerShape);
+        computerLabel.setText("Computer: " + computerShape);
+
+        int result = checkWinner(playerShape, computerShape);
+
+        String message = "Player: " + playerShape + "\n"
+                + "Computer: " + computerShape + "\n\n";
+
+        // Вот тут та самая логика из заготовки:
+        switch (result) {
             case -1:
                 message += "Computer has won!";
                 break;
@@ -95,7 +117,6 @@ public class MainFrame extends JFrame implements ActionListener {
                 message += "Player has won!";
         }
 
-        // Вивести діалогове вікно з повідомленням
-        JOptionPane.showMessageDialog(null, message);
+        JOptionPane.showMessageDialog(this, message, "Result", JOptionPane.INFORMATION_MESSAGE);
     }
 }
