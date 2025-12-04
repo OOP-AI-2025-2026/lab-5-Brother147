@@ -1,9 +1,12 @@
 package ua.opnu;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainFrame("RoShamBo"));
+        SwingUtilities.invokeLater(() -> {
+            MainFrame frame = new MainFrame("Rock-Paper-Scissors");
+            frame.setVisible(true);
+        });
     }
 }
